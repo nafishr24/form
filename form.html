@@ -221,7 +221,7 @@ let pesertaCount = 0;
       const suggestions = matches.slice(0, maxSuggestions);
 
       if (suggestions.length === 0) {
-        listDiv.innerHTML = '<div>Tidak ada rekomendasi</div>';
+        listDiv.innerHTML = '';
         return;
       }
 
