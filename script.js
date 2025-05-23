@@ -1,4 +1,4 @@
-    const nomorPanitia = "6287701330823"; // Ganti dengan nomor panitia yang benar
+    const nomorPanitia = ""; // Ganti dengan nomor panitia yang benar
     let pesertaCount = 0;
     let sekolahList = [];
 
@@ -94,6 +94,16 @@
         <label for="nama-${pesertaCount}">Nama:</label>
         <input type="text" name="nama[]" id="nama-${pesertaCount}" required>
 
+        <label for="jenjang-${pesertaCount}">Jenjang:</label>
+        <select name="jenjang[]" id="jenjang-${pesertaCount}">
+          <option value="">Pilih Jenjang</option>
+          <option value="SD Level 1">SD Level 1</option>
+          <option value="SD Level 2">SD Level 2</option>
+          <option value="SD Level 3">SD Level 3</option>
+          <option value="SMP/Sederajat">SMP/Sederajat</option>
+          <option value="SMA/Sederajat">SMA/Sederajat</option>
+        </select>
+
         <label for="nis-${pesertaCount}">NIS (Optional):</label>
         <input type="text" name="nis[]" id="nis-${pesertaCount}">
 
@@ -160,6 +170,9 @@
           sec.querySelector(`input[name="asal_sekolah[]"]`).id = `asal_sekolah-${pesertaCount}`;
           sec.querySelector(`label[for^="asal_sekolah-"]`).setAttribute("for", `asal_sekolah-${pesertaCount}`);
 
+          sec.querySelector(`select[name="jenjang[]"]`).id = `jenjang-${pesertaCount}`;
+          sec.querySelector(`label[for^="jenjang-"]`).setAttribute("for", `jenjang-${pesertaCount}`);
+
           sec.querySelector(".remove-btn").setAttribute("onclick", `removePesertaField(${pesertaCount})`);
         });
       }
@@ -212,9 +225,10 @@
         const tanggalLahir = section.querySelector(`input[name="tanggal_lahir[]"]`).value;
         const kelas = section.querySelector(`input[name="kelas[]"]`).value.trim();
         const sekolah = section.querySelector(`input[name="asal_sekolah[]"]`).value.trim();
+        const jenjangPeserta = section.querySelector(`select[name="jenjang[]"]`).value.trim();
 
         // Validasi lengkap
-        if (!nama || !tanggalLahir || !kelas || !sekolah) {
+        if (!nama || !tanggalLahir || !kelas || !sekolah || !jenjangPeserta) {
           showToast(`Data peserta ke-${i + 1} belum lengkap.`);
           return;
         }
@@ -240,10 +254,11 @@
         formData.append("kelas", kelas);
         formData.append("asal_sekolah", sekolah);
         formData.append("rayon", rayon);
+        formData.append("jenjang", jenjangPeserta);
 
-        // Kirim ke Google Apps Script
+        // Kirim ke Google Apps Script (Ganti dengan Web Appp)
         submitPromises.push(
-          fetch("https://script.google.com/macros/s/AKfycbxQdaK0C3prKweq0pfz4yfTiaW-7opschm9m7Aeov7IwNwH4Q7SYpW7ob8o7imIHBPr/exec", {
+          fetch("", {
             method: "POST",
             body: formData
           })
@@ -260,7 +275,7 @@
           pesertaSections.forEach((section, index) => {
             const nama = section.querySelector(`input[name="nama[]"]`).value.trim();
             const sekolah = section.querySelector(`input[name="asal_sekolah[]"]`).value.trim();
-            pesertaList += `${index + 1}. ${nama} dari ${sekolah}\n`;
+            pesertaList += `\n${index + 1}. ${nama} dari ${sekolah}\n`;
           });
 
           const whatsappMessage = `Halo, saya adalah ${namaPendamping}, pembimbing atau pendamping dari:\n${pesertaList}\ningin melakukan konfirmasi terkait dengan pendaftaran...`;
@@ -268,13 +283,16 @@
           // Encode message untuk URL WhatsApp
           const encodedMessage = encodeURIComponent(whatsappMessage);
           
-          // Buka WhatsApp dengan pesan yang sudah disiapkan
-          window.open(`https://wa.me/${nomorPanitia}?text=${encodedMessage}`, '_blank');
-
-          form.reset();
-          document.getElementById("pesertaContainer").innerHTML = "";
-          pesertaCount = 0;
-          addPesertaField();  // tambah peserta baru kosong setelah submit
+          // Tambahkan jeda 1 detik sebelum buka WhatsApp
+          setTimeout(() => {
+            window.open(`https://wa.me/${nomorPanitia}?text=${encodedMessage}`, '_blank');
+            
+            // Reset form setelah buka WhatsApp
+            form.reset();
+            document.getElementById("pesertaContainer").innerHTML = "";
+            pesertaCount = 0;
+            addPesertaField();
+          }, 1000); // Jeda 1000ms = 1 detik
         })
         .catch(error => {
           console.error(error);

@@ -6,7 +6,7 @@ function doPost(e) {
 
   // Header
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["Timestamp", "Nama Pendamping", "Kontak Pendamping", "Rayon", "Nama Peserta", "NIS", "Tanggal Lahir", "Kelas", "Asal Sekolah"]);
+    sheet.appendRow(["Timestamp", "Nama Pendamping", "Kontak Pendamping", "Rayon", "Jenjang", "Nama Peserta", "NIS", "Tanggal Lahir", "Kelas", "Asal Sekolah"]);
   }
 
   const timestamp = new Date();
@@ -16,6 +16,7 @@ function doPost(e) {
 
   // Tangani array untuk peserta
   const namaPeserta = e.parameter.nama || [];
+  const jenjangPeserta = e.parameter.jenjang || [];
   const nis = e.parameter.nis || [];
   const tanggalLahir = e.parameter.tanggal_lahir || [];
   const kelas = e.parameter.kelas || [];
@@ -30,6 +31,7 @@ function doPost(e) {
       namaPendamping,
       kontakPendamping,
       rayon,
+      Array.isArray(jenjangPeserta) ? jenjangPeserta[i] : jenjangPeserta,
       Array.isArray(namaPeserta) ? namaPeserta[i] : namaPeserta,
       Array.isArray(nis) ? nis[i] : nis,
       Array.isArray(tanggalLahir) ? tanggalLahir[i] : tanggalLahir,
