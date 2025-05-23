@@ -153,6 +153,7 @@
     <input type="text" name="nama_pendamping" id="nama_pendamping" required>
 
     <label for="kontak_pendamping">Kontak Pendamping:</label>
+    <p>Kontak diperlukan agar bisa dikirim notifikasi oleh panitia</p>
     <input type="text" name="kontak_pendamping" id="kontak_pendamping" required>
 
     <label for="rayon">Rayon:</label>
@@ -174,7 +175,8 @@
   <div id="toast"></div>
 
   <script>
-let pesertaCount = 0;
+    const nomorPanitia = "6281234567890"; // Ganti dengan nomor panitia yang benar
+    let pesertaCount = 0;
     let sekolahList = [];
 
     // Fungsi menampilkan toast
@@ -269,8 +271,8 @@ let pesertaCount = 0;
         <label for="nama-${pesertaCount}">Nama:</label>
         <input type="text" name="nama[]" id="nama-${pesertaCount}" required>
 
-        <label for="nis-${pesertaCount}">NIS:</label>
-        <input type="text" name="nis[]" id="nis-${pesertaCount}" required>
+        <label for="nis-${pesertaCount}">NIS (Optional):</label>
+        <input type="text" name="nis[]" id="nis-${pesertaCount}">
 
         <label for="tanggal_lahir-${pesertaCount}">Tanggal Lahir:</label>
         <input type="date" name="tanggal_lahir[]" id="tanggal_lahir-${pesertaCount}" required>
@@ -389,14 +391,14 @@ let pesertaCount = 0;
         const sekolah = section.querySelector(`input[name="asal_sekolah[]"]`).value.trim();
 
         // Validasi lengkap
-        if (!nama || !nis || !tanggalLahir || !kelas || !sekolah) {
+        if (!nama || !tanggalLahir || !kelas || !sekolah) {
           showToast(`Data peserta ke-${i + 1} belum lengkap.`);
           return;
         }
 
         // Validasi angka untuk nis dan kelas
-        if (!/^\d+$/.test(nis)) {
-          showToast(`NIS peserta ke-${i + 1} harus berupa angka!`);
+        if (nis && !/^\d+$/.test(nis)) {
+          showToast(`NIS peserta ke-${i + 1} harus berupa angka jika diisi!`);
           return;
         }
         if (!/^\d+$/.test(kelas)) {
@@ -418,7 +420,7 @@ let pesertaCount = 0;
 
         // Kirim ke Google Apps Script
         submitPromises.push(
-          fetch("https://script.google.com/macros/s/AKfycby9v1MYf34qHg47iMfMqrsLv0RGI5z_RZfchBO80YmzIoimbWoz8enJZnL1E3Wx9Cc/exec", {
+          fetch("https://script.google.com/macros/s/AKfycbxQdaK0C3prKweq0pfz4yfTiaW-7opschm9m7Aeov7IwNwH4Q7SYpW7ob8o7imIHBPr/exec", {
             method: "POST",
             body: formData
           })
@@ -428,6 +430,24 @@ let pesertaCount = 0;
       Promise.all(submitPromises)
         .then(() => {
           showToast("Semua peserta berhasil dikirim!");
+          // Buat pesan WhatsApp
+          let pesertaList = "";
+          const pesertaSections = document.querySelectorAll(".peserta-section");
+          
+          pesertaSections.forEach((section, index) => {
+            const nama = section.querySelector(`input[name="nama[]"]`).value.trim();
+            const sekolah = section.querySelector(`input[name="asal_sekolah[]"]`).value.trim();
+            pesertaList += `${index + 1}. ${nama} dari ${sekolah}\n`;
+          });
+
+          const whatsappMessage = `Halo, saya adalah ${namaPendamping}, pembimbing atau pendamping dari:\n${pesertaList}\ningin melakukan konfirmasi terkait dengan pendaftaran...`;
+          
+          // Encode message untuk URL WhatsApp
+          const encodedMessage = encodeURIComponent(whatsappMessage);
+          
+          // Buka WhatsApp dengan pesan yang sudah disiapkan
+          window.open(`https://wa.me/${nomorPanitia}?text=${encodedMessage}`, '_blank');
+
           form.reset();
           document.getElementById("pesertaContainer").innerHTML = "";
           pesertaCount = 0;
@@ -438,6 +458,7 @@ let pesertaCount = 0;
           showToast("Gagal mengirim beberapa data.");
         });
     });
+      
   </script>
 </body>
 </html>
